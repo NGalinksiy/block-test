@@ -1,8 +1,10 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { Shape } from '../shape/Shape';
-import { ShapeName } from '../shape/shape.config';
+import { GameScene } from '@/scenes';
 
 export class RowShape extends Container {
+  declare parent: GameScene;
+
   constructor() {
     super();
 

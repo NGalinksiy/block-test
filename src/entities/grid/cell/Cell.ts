@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite } from 'pixi.js';
 
 export class Cell extends Container {
   readonly boardPosition: { x: number; y: number };

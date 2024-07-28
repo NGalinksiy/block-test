@@ -1,4 +1,4 @@
-enum ShapeName {
+export enum ShapeName {
   DOTS = 'dots',
 }
 

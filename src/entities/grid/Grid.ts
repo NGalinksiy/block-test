@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Container, Graphics, Sprite } from 'pixi.js';
 import { DEFAULT_SIZE } from './grid.config';
 import { Cell } from './cell/Cell';
 import { Shape } from '../shape/Shape';
@@ -45,7 +45,7 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of shape.structure.entries()) {
-      for (const [j, cell] of row.entries()) {
+      for (const [j, _cell] of row.entries()) {
         let cell: Cell | undefined = undefined;
         try {
           cell = this.matrix[y + i][x + j];
@@ -117,7 +117,7 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of dragTarget.structure.entries()) {
-      for (const [j, cell] of row.entries()) {
+      for (const [j, _cell] of row.entries()) {
         this.addShape(x + j, y + i, dragTarget.textureName, true);
       }
     }
@@ -145,7 +145,7 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of shape.structure.entries()) {
-      for (const [j, cell] of row.entries()) {
+      for (const [j, _cell] of row.entries()) {
         this.addShape(x + j, y + i, shape.textureName, false);
       }
     }

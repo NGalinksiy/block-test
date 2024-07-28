@@ -24,11 +24,12 @@ export class GameScene extends Container {
     this.rowShape.generateShape();
   }
 
-  onDragStart(event: FederatedPointerEvent) {
+  onDragStart() {
     console.log('started drag');
     this.alpha = 0.5;
     const parent = this.parent.parent as GameScene;
 
+    //@ts-ignore
     parent.dragTarget = this;
 
     parent.on('pointermove', parent.onDragMove);

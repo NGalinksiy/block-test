@@ -53,7 +53,7 @@ export class Shape extends Container {
     const blocks = [];
 
     for (const [i, row] of this.structure.entries()) {
-      for (const [j, cell] of row.entries()) {
+      for (const [j, _cell] of row.entries()) {
         const block = Sprite.from(this.textureName);
         block.width = 110;
         block.height = 110;
