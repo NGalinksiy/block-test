@@ -3,8 +3,10 @@ import { DEFAULT_SIZE } from './grid.config';
 import { Cell } from './cell/Cell';
 import { Shape } from '../shape/Shape';
 import { updateScore } from '../score/update-score';
+import { GameScene } from '@/scenes';
 
 export class Grid extends Container {
+  declare parent: GameScene;
   private readonly matrix: Cell[][];
   ghostPosition: {
     position: { x: number; y: number };
@@ -60,9 +62,33 @@ export class Grid extends Container {
     return true;
   }
 
+  canBeSet(shapes: Shape[]): boolean {
+    if (!shapes.length) return true;
+
+    const size = this.matrix.length;
+    const amountShapes = shapes.length;
+
+    for (let j = 0; j < size; j++) {
+      for (let i = 0; i < size; i++) {
+        for (const shape of shapes) {
+          if (this.validSet(shape, { x: i, y: j })) {
+            const shape = shapes.shift();
+            shape?.toEnable();
+            continue;
+          }
+        }
+      }
+    }
+
+    shapes.forEach((shape) => shape.toDisable());
+
+    return amountShapes !== shapes.length;
+  }
+
   checkMatrix() {
     const size = this.matrix.length;
     let score: number = 0;
+    const forDestruction = [];
 
     // очень тупая проверка всей матрицы, но я хочу спать
     for (let i = 0; i < size; i++) {
@@ -74,9 +100,9 @@ export class Grid extends Container {
         }
       }
       if (allOnes) {
+        navigator.vibrate(100);
         this.matrix[i].forEach((cell) => {
-          cell.clearCell();
-          score += 1;
+          forDestruction.push(cell);
         });
       }
     }
@@ -90,19 +116,30 @@ export class Grid extends Container {
         }
       }
       if (allOnes) {
+        navigator.vibrate(100);
         for (let i = 0; i < size; i++) {
-          const cell = this.matrix[i][j];
-          cell.clearCell();
-          score += 1;
+          forDestruction.push(this.matrix[i][j]);
         }
       }
     }
 
+    forDestruction.forEach((cell) => {
+      score += 1;
+      cell.clearCell();
+    });
+
     updateScore(score);
+    this.parent.update();
   }
+
   showGhost(dragTarget: Shape, position: { x: number; y: number }) {
     if (!this.validSet(dragTarget, position)) {
-      this.resetGhost();
+      if (
+        this.ghostPosition?.position.x !== position.x &&
+        this.ghostPosition?.position.y !== position.y
+      ) {
+        this.resetGhost();
+      }
       return;
     }
 
@@ -149,6 +186,8 @@ export class Grid extends Container {
         this.addShape(x + j, y + i, shape.textureName, false);
       }
     }
+
+    this.parent.update();
   }
 
   private addShape(
@@ -168,8 +207,6 @@ export class Grid extends Container {
       }
 
       this.matrix[y][x].addChild(sprite);
-    } catch {
-      console.log('error');
-    }
+    } catch {}
   }
 }

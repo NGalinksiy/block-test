@@ -34,8 +34,13 @@ export class RowShape extends Container {
     this.addChild(shape);
   }
 
+  getShapes(): Shape[] {
+    return this.children.filter(
+      (child) => child instanceof Shape && !child.isInstalled
+    ) as Shape[];
+  }
+
   generateShape() {
-    console.log(this.children);
     if (this.children.length !== 1) return;
     for (let i = 0; i < 3; i++) {
       this.addShape(i);

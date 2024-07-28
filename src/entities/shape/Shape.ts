@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture } from 'pixi.js';
+import { Container, Rectangle, Sprite, Texture } from 'pixi.js';
 import { ALL_SHAPES, BLOCK_COLORS } from './shape.config';
 import { GameScene } from '@/scenes';
 import { getRandomInt } from '@/shared/utils';
@@ -22,19 +22,34 @@ export class Shape extends Container {
     this.eventMode = 'static';
     this.addChild(...shapes);
 
-    const background = Sprite.from(Texture.EMPTY);
-    background.width = this.width;
-    background.height = this.height;
-    this.addChild(background);
+    this.hitArea = new Rectangle(
+      -110,
+      -110,
+      this.width + 220,
+      this.height + 220
+    );
 
-    this.scale.set(0.55);
+    this.scale.set(0.5);
     this.pivot.y = (0.5 * this.height) / this.scale.y;
     this.pivot.x = (0.5 * this.width) / this.scale.x;
   }
 
+  toDisable() {
+    this.eventMode = 'none';
+    this.alpha = 0.5;
+  }
+
+  toEnable() {
+    this.eventMode = 'static';
+    this.alpha = 1;
+  }
+
   resetPosition() {
+    this.pivot.y = (0.5 * this.height) / this.scale.y;
+    this.pivot.x = (0.5 * this.width) / this.scale.x;
     this.x = this.originPosition.x;
     this.y = this.originPosition.y;
+    this.scale.set(0.5);
   }
 
   private getRandomStructure(): number[][] {

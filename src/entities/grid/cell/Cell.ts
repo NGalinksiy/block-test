@@ -24,7 +24,9 @@ export class Cell extends Container {
 
   clearCell() {
     this.installedBlock = false;
-    this.removeChildren(1);
+    try {
+      this.removeChildren(1);
+    } catch {}
   }
 
   private getColorCell(): string {

@@ -1,12 +1,14 @@
 import { Grid, RowShape, Shape } from '@/entities';
 import { DEFAULT_SIZE } from '@/entities/grid/grid.config';
 import { Application, Container, FederatedPointerEvent } from 'pixi.js';
+import { GameState } from './game-scene.types';
 
 export class GameScene extends Container {
   label = 'game-scene';
-  private readonly grid: Grid;
-  private readonly rowShape: RowShape;
+  readonly grid: Grid;
+  readonly rowShape: RowShape;
   private dragTarget: null | Shape = null;
+  private gameState = GameState.GAMEPLAY;
 
   constructor(app: Application) {
     super();
@@ -26,8 +28,12 @@ export class GameScene extends Container {
 
   onDragStart() {
     console.log('started drag');
-    this.alpha = 0.5;
+    this.alpha = 1;
     const parent = this.parent.parent as GameScene;
+    console.log(this.getBounds());
+    this.scale.set(1);
+    this.pivot.y +=
+      this.height >= 500 ? this.height / 2 : this.height / 2 + 110;
 
     //@ts-ignore
     parent.dragTarget = this;
@@ -36,31 +42,40 @@ export class GameScene extends Container {
   }
 
   private onDragMove(event: FederatedPointerEvent) {
-    // console.log('move', this.dragTarget);
-    if (this.dragTarget) {
-      this.dragTarget.parent.toLocal(
-        event.global,
-        undefined,
-        this.dragTarget.position
-      );
+    if (!this.dragTarget) return;
 
-      const { x: globalX, y: globalY } = this.dragTarget.getGlobalPosition();
+    this.dragTarget.parent.toLocal(
+      event.global,
+      undefined,
+      this.dragTarget.position
+    );
 
-      if (globalY >= 1010) {
-        this.grid.resetGhost();
-        return;
-      }
+    const { x: globalX, y: globalY } = this.dragTarget.getGlobalPosition();
 
-      const rawX = Math.round(globalX / 110 - this.dragTarget.width / 110);
-      const rawY = Math.round(
-        globalY / 110 - (this.dragTarget.height * 2) / 110
-      );
+    const rawX = Math.round((globalX - this.dragTarget.width * 0.7) / 110);
+    const rawY = Math.round(
+      (globalY - this.dragTarget.pivot.y) / 110 -
+        this.dragTarget.height / 2 / 110
+    );
 
-      const [x, y] = this.resolvingCoordinates(rawX, rawY);
+    const [x, y] = this.resolvingCoordinates(rawX, rawY);
 
-      console.log(x, y);
+    console.log(`x: ${x}`, `y: ${y}`);
 
-      this.grid.showGhost(this.dragTarget, { x, y });
+    this.grid.showGhost(this.dragTarget, { x, y });
+  }
+
+  update() {
+    this.rowShape.generateShape();
+    const shapes = this.rowShape.getShapes();
+    const isGameOver = !this.grid.canBeSet(shapes);
+
+    if (isGameOver && this.gameState !== GameState.GAMEOVER) {
+      this.gameState = GameState.GAMEOVER;
+      setTimeout(() => {
+        window.confirm('gameover');
+        window.location.reload();
+      }, 1000);
     }
   }
 
@@ -78,11 +93,12 @@ export class GameScene extends Container {
         this.grid.checkMatrix();
         this.rowShape.removeChild(this.dragTarget);
         this.dragTarget = null;
-        this.rowShape.generateShape();
       } else {
         this.dragTarget.resetPosition();
       }
     }
+
+    this.update();
   }
 
   private resolvingCoordinates(x: number, y: number) {
@@ -95,10 +111,10 @@ export class GameScene extends Container {
     if (resolveY > DEFAULT_SIZE - 1) {
       resolveY = DEFAULT_SIZE - 1;
     }
-    if (resolveX === -1) {
+    if (resolveX < 0) {
       resolveX = 0;
     }
-    if (resolveY === -1) {
+    if (resolveY < 0) {
       resolveY = 0;
     }
     return [resolveX, resolveY];
