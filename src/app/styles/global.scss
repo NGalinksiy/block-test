@@ -1,0 +1,20 @@
+body {
+  height: 100vh;
+  width: 100vw;
+
+  background-color: #2e186c;
+
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  max-width: 500px;
+  height: 100%;
+
+  // height: 100%;
+  padding: 0px 5%;
+}
