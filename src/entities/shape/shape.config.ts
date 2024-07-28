@@ -27,6 +27,8 @@ const shape5x1 = [[1, 1, 1, 1, 1]];
 
 const shape1x5 = [[1], [1], [1], [1], [1]];
 
+const shapeTriangle1 = [[1, 1], [1]];
+
 export const ALL_SHAPES = [
   shape1x1,
   shape4x4,
@@ -37,6 +39,7 @@ export const ALL_SHAPES = [
   shape5x1,
   shape1x2,
   shape1x5,
+  shapeTriangle1,
 ];
 
 export const BLOCK_COLORS = [
