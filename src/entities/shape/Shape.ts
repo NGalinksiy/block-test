@@ -1,4 +1,4 @@
-import { Container, Rectangle, Sprite, Texture } from 'pixi.js';
+import { Container, Rectangle, Sprite } from 'pixi.js';
 import { ALL_SHAPES, BLOCK_COLORS } from './shape.config';
 import { GameScene } from '@/scenes';
 import { getRandomInt } from '@/shared/utils';

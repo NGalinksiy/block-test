@@ -4,6 +4,7 @@ import { Cell } from './cell/Cell';
 import { Shape } from '../shape/Shape';
 import { updateScore } from '../score/update-score';
 import { GameScene } from '@/scenes';
+import { startLightVibrate } from '@/shared/utils';
 
 export class Grid extends Container {
   declare parent: GameScene;
@@ -100,7 +101,7 @@ export class Grid extends Container {
         }
       }
       if (allOnes) {
-        navigator.vibrate(100);
+        startLightVibrate();
         this.matrix[i].forEach((cell) => {
           forDestruction.push(cell);
         });
@@ -116,7 +117,7 @@ export class Grid extends Container {
         }
       }
       if (allOnes) {
-        navigator.vibrate(100);
+        startLightVibrate();
         for (let i = 0; i < size; i++) {
           forDestruction.push(this.matrix[i][j]);
         }
@@ -186,8 +187,6 @@ export class Grid extends Container {
         this.addShape(x + j, y + i, shape.textureName, false);
       }
     }
-
-    this.parent.update();
   }
 
   private addShape(

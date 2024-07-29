@@ -52,11 +52,10 @@ export class GameScene extends Container {
 
     const { x: globalX, y: globalY } = this.dragTarget.getGlobalPosition();
 
-    const rawX = Math.round((globalX - this.dragTarget.width * 0.7) / 110);
-    const rawY = Math.round(
-      (globalY - this.dragTarget.pivot.y) / 110 -
-        this.dragTarget.height / 2 / 110
+    const rawX = Math.round(
+      (globalX - this.dragTarget.width * 0.5) / 110 - 0.7
     );
+    const rawY = Math.round((globalY - this.dragTarget.pivot.y) / 110 - 0.5);
 
     const [x, y] = this.resolvingCoordinates(rawX, rawY);
 
