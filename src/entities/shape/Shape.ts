@@ -2,6 +2,7 @@ import { Container, Rectangle, Sprite } from 'pixi.js';
 import { ALL_SHAPES, BLOCK_COLORS } from './shape.config';
 import { GameScene } from '@/scenes';
 import { getRandomInt } from '@/shared/utils';
+import { CELL_MARGIN, CELL_SIDE } from '@/shared/constants';
 
 export class Shape extends Container {
   declare parent: GameScene;
@@ -23,15 +24,27 @@ export class Shape extends Container {
     this.addChild(...shapes);
 
     this.hitArea = new Rectangle(
-      -110,
-      -110,
-      this.width + 220,
-      this.height + 220
+      -CELL_SIDE,
+      -CELL_SIDE,
+      this.width + CELL_SIDE * 2,
+      this.height + CELL_SIDE * 2
     );
 
     this.scale.set(0.5);
     this.pivot.y = (0.5 * this.height) / this.scale.y;
     this.pivot.x = (0.5 * this.width) / this.scale.x;
+  }
+
+  onDragStart() {
+    this.alpha = 1;
+    const parent = this.parent.parent as GameScene;
+    this.scale.set(1);
+    this.pivot.y +=
+      this.height >= 500 ? this.height / 2 : this.height / 2 + CELL_SIDE;
+
+    parent.dragTarget = this;
+
+    parent.on('pointermove', parent.onDragMove);
   }
 
   toDisable() {
@@ -68,12 +81,15 @@ export class Shape extends Container {
     const blocks = [];
 
     for (const [i, row] of this.structure.entries()) {
-      for (const [j, _cell] of row.entries()) {
+      for (const [j, cell] of row.entries()) {
+        if (!cell) {
+          continue;
+        }
         const block = Sprite.from(this.textureName);
-        block.width = 110;
-        block.height = 110;
-        block.x += 116 * j;
-        block.y += 116 * i;
+        block.width = CELL_SIDE;
+        block.height = CELL_SIDE;
+        block.x += (CELL_SIDE + CELL_MARGIN) * j;
+        block.y += (CELL_SIDE + CELL_MARGIN) * i;
         blocks.push(block);
       }
     }

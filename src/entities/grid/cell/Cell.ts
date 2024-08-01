@@ -1,3 +1,4 @@
+import { CELL_MARGIN, CELL_SIDE } from '@/shared/constants';
 import { Container, Sprite } from 'pixi.js';
 
 export class Cell extends Container {
@@ -13,11 +14,11 @@ export class Cell extends Container {
 
     this.addChild(Sprite.from(cellColor));
 
-    this.width = 110;
-    this.height = 110;
+    this.width = CELL_SIDE;
+    this.height = CELL_SIDE;
 
-    this.x = x * 110 + 6 * x + 24;
-    this.y = y * 110 + 6 * y + 24;
+    this.x = x * CELL_SIDE + CELL_MARGIN * x + 24;
+    this.y = y * CELL_SIDE + CELL_MARGIN * y + 24;
 
     this.label = cellLabel;
   }

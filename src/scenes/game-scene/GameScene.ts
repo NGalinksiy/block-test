@@ -1,14 +1,19 @@
 import { Grid, RowShape, Shape } from '@/entities';
-import { DEFAULT_SIZE } from '@/entities/grid/grid.config';
-import { Application, Container, FederatedPointerEvent } from 'pixi.js';
+import {
+  Application,
+  Container,
+  FederatedPointerEvent,
+  Rectangle,
+} from 'pixi.js';
 import { GameState } from './game-scene.types';
+import { CELL_SIDE } from '@/shared/constants';
 
 export class GameScene extends Container {
   label = 'game-scene';
   readonly grid: Grid;
   readonly rowShape: RowShape;
-  private dragTarget: null | Shape = null;
   private gameState = GameState.GAMEPLAY;
+  dragTarget: null | Shape = null;
 
   constructor(app: Application) {
     super();
@@ -17,7 +22,8 @@ export class GameScene extends Container {
     this.rowShape = new RowShape();
 
     this.eventMode = 'static';
-    this.hitArea = app.screen;
+    this.hitArea = new Rectangle(0, 0, 970, 1417);
+
     this.on('pointerup', this.onDragEnd);
     this.on('pointerupoutside', this.onDragEnd);
 
@@ -26,22 +32,7 @@ export class GameScene extends Container {
     this.rowShape.generateShape();
   }
 
-  onDragStart() {
-    console.log('started drag');
-    this.alpha = 1;
-    const parent = this.parent.parent as GameScene;
-    console.log(this.getBounds());
-    this.scale.set(1);
-    this.pivot.y +=
-      this.height >= 500 ? this.height / 2 : this.height / 2 + 110;
-
-    //@ts-ignore
-    parent.dragTarget = this;
-
-    parent.on('pointermove', parent.onDragMove);
-  }
-
-  private onDragMove(event: FederatedPointerEvent) {
+  onDragMove(event: FederatedPointerEvent): void {
     if (!this.dragTarget) return;
 
     this.dragTarget.parent.toLocal(
@@ -53,9 +44,11 @@ export class GameScene extends Container {
     const { x: globalX, y: globalY } = this.dragTarget.getGlobalPosition();
 
     const rawX = Math.round(
-      (globalX - this.dragTarget.width * 0.5) / 110 - 0.7
+      (globalX - this.dragTarget.width * 0.5) / CELL_SIDE - 0.7
     );
-    const rawY = Math.round((globalY - this.dragTarget.pivot.y) / 110 - 0.5);
+    const rawY = Math.round(
+      (globalY - this.dragTarget.pivot.y) / CELL_SIDE - 0.5
+    );
 
     const [x, y] = this.resolvingCoordinates(rawX, rawY);
 
@@ -64,7 +57,7 @@ export class GameScene extends Container {
     this.grid.showGhost(this.dragTarget, { x, y });
   }
 
-  update() {
+  update(): void {
     this.rowShape.generateShape();
     const shapes = this.rowShape.getShapes();
     const isGameOver = !this.grid.canBeSet(shapes);
@@ -78,9 +71,8 @@ export class GameScene extends Container {
     }
   }
 
-  private onDragEnd(event: FederatedPointerEvent) {
-    console.log(event);
-    // console.log('ended drag', this.dragTarget);
+  private onDragEnd(): void {
+    console.log('ended drag', this.dragTarget);
 
     if (this.dragTarget) {
       this.off('pointermove', this.onDragMove);
@@ -96,19 +88,17 @@ export class GameScene extends Container {
         this.dragTarget.resetPosition();
       }
     }
-
-    this.update();
   }
 
-  private resolvingCoordinates(x: number, y: number) {
+  private resolvingCoordinates(x: number, y: number): [number, number] {
     let resolveX = x;
     let resolveY = y;
 
-    if (resolveX > DEFAULT_SIZE - 1) {
-      resolveX = DEFAULT_SIZE - 1;
+    if (resolveX > this.grid.size - 1) {
+      resolveX = this.grid.size - 1;
     }
-    if (resolveY > DEFAULT_SIZE - 1) {
-      resolveY = DEFAULT_SIZE - 1;
+    if (resolveY > this.grid.size - 1) {
+      resolveY = this.grid.size - 1;
     }
     if (resolveX < 0) {
       resolveX = 0;

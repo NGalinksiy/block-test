@@ -5,10 +5,18 @@ import { Shape } from '../shape/Shape';
 import { updateScore } from '../score/update-score';
 import { GameScene } from '@/scenes';
 import { startLightVibrate } from '@/shared/utils';
+import { CELL_MARGIN, GRID_SIDE } from '@/shared/constants';
+import {
+  LIGHT_PURPLE_GRID_BORDER,
+  PURPLE_GRID_BACKGROUND,
+} from './grid.constants';
+import { objectToCenter } from '@/shared/utils/object-to-center';
+import { PIXI_CONFIG } from '@/app';
 
 export class Grid extends Container {
   declare parent: GameScene;
   private readonly matrix: Cell[][];
+  size: number = DEFAULT_SIZE;
   ghostPosition: {
     position: { x: number; y: number };
     sprites: Sprite[];
@@ -19,17 +27,24 @@ export class Grid extends Container {
     super();
 
     const background = new Graphics()
-      .roundRect(12, 12, 946, 946, 6)
-      .fill('32166D');
+      .roundRect(12, 12, GRID_SIDE - 24, GRID_SIDE - 24, CELL_MARGIN)
+      .fill(PURPLE_GRID_BACKGROUND);
 
-    const border = new Graphics().roundRect(0, 0, 970, 970, 18).fill('E6C7E9');
+    const border = new Graphics()
+      .roundRect(0, 0, GRID_SIDE, GRID_SIDE, CELL_MARGIN * 3)
+      .fill(LIGHT_PURPLE_GRID_BORDER);
 
     this.addChild(border, background);
 
     this.matrix = this.initMatrix();
+
+    // this.pivot.y = (0.5 * this.height) / this.scale.y;
+    // this.pivot.x = (0.5 * this.width) / this.scale.x;
+    // this.x = PIXI_CONFIG.width / 2;
   }
 
   private initMatrix(size: number = DEFAULT_SIZE): Cell[][] {
+    this.size = size;
     const matrix: Cell[][] = new Array(size);
 
     for (let i = 0; i < size; i++) {
@@ -48,7 +63,8 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of shape.structure.entries()) {
-      for (const [j, _cell] of row.entries()) {
+      for (const [j, value] of row.entries()) {
+        if (!value) continue;
         let cell: Cell | undefined = undefined;
         try {
           cell = this.matrix[y + i][x + j];
@@ -67,26 +83,26 @@ export class Grid extends Container {
     if (!shapes.length) return true;
 
     const size = this.matrix.length;
-    const amountShapes = shapes.length;
+
+    let shapesCantBeSet = [...shapes];
 
     for (let j = 0; j < size; j++) {
       for (let i = 0; i < size; i++) {
         for (const shape of shapes) {
-          if (this.validSet(shape, { x: i, y: j })) {
-            const shape = shapes.shift();
-            shape?.toEnable();
-            continue;
-          }
+          if (!this.validSet(shape, { x: i, y: j })) continue;
+
+          shape.toEnable();
+          shapesCantBeSet = shapesCantBeSet.filter((s) => s.uid !== shape.uid);
         }
       }
     }
 
-    shapes.forEach((shape) => shape.toDisable());
+    shapesCantBeSet.forEach((shape) => shape.toDisable());
 
-    return amountShapes !== shapes.length;
+    return shapes.length !== shapesCantBeSet.length;
   }
 
-  checkMatrix() {
+  checkMatrix(): void {
     const size = this.matrix.length;
     let score: number = 0;
     const forDestruction = [];
@@ -134,7 +150,8 @@ export class Grid extends Container {
   }
 
   showGhost(dragTarget: Shape, position: { x: number; y: number }) {
-    if (!this.validSet(dragTarget, position)) {
+    const isValid = !this.validSet(dragTarget, position);
+    if (isValid) {
       if (
         this.ghostPosition?.position.x !== position.x &&
         this.ghostPosition?.position.y !== position.y
@@ -155,7 +172,8 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of dragTarget.structure.entries()) {
-      for (const [j, _cell] of row.entries()) {
+      for (const [j, cell] of row.entries()) {
+        if (!cell) continue;
         this.addShape(x + j, y + i, dragTarget.textureName, true);
       }
     }
@@ -183,7 +201,8 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of shape.structure.entries()) {
-      for (const [j, _cell] of row.entries()) {
+      for (const [j, cell] of row.entries()) {
+        if (!cell) continue;
         this.addShape(x + j, y + i, shape.textureName, false);
       }
     }

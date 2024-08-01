@@ -1,6 +1,7 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { Shape } from '../shape/Shape';
 import { GameScene } from '@/scenes';
+import { GRID_SIDE } from '@/shared/constants';
 
 export class RowShape extends Container {
   declare parent: GameScene;
@@ -9,17 +10,17 @@ export class RowShape extends Container {
     super();
 
     const background = Sprite.from(Texture.EMPTY);
-    background.width = 970;
+    background.width = GRID_SIDE;
     background.height = 300;
 
-    this.y = 970 + 50;
+    this.y = GRID_SIDE + 50;
 
     this.addChild(background);
   }
 
   addShape(i: number) {
     const shape = new Shape(i);
-    shape.on('pointerdown', this.parent.onDragStart, shape);
+    shape.on('pointerdown', shape.onDragStart, shape);
 
     shape.x =
       i === 0
@@ -41,7 +42,7 @@ export class RowShape extends Container {
   }
 
   generateShape() {
-    if (this.children.length !== 1) return;
+    if (this.getShapes().length) return;
     for (let i = 0; i < 3; i++) {
       this.addShape(i);
     }
