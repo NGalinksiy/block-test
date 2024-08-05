@@ -3,16 +3,18 @@ import { ALL_SHAPES, BLOCK_COLORS } from './shape.config';
 import { GameScene } from '@/scenes';
 import { getRandomInt } from '@/shared/utils';
 import { CELL_MARGIN, CELL_SIDE } from '@/shared/constants';
+import { BlockColor, ShapeStructure } from './shape.types';
+import gsap from 'gsap';
 
 export class Shape extends Container {
   declare parent: GameScene;
   isInstalled: boolean = false;
-  readonly structure: number[][];
+  readonly structure: ShapeStructure;
   originPosition!: { x: number; y: number };
   readonly textureName = this.getRandomBlockTextureName();
   readonly order: number;
 
-  constructor(order: number, structure?: number[][]) {
+  constructor(order: number, structure?: ShapeStructure) {
     super();
 
     this.order = order;
@@ -49,12 +51,26 @@ export class Shape extends Container {
 
   toDisable() {
     this.eventMode = 'none';
-    this.alpha = 0.5;
+
+    if (this.alpha === 0.5) return;
+
+    gsap.to(this, {
+      alpha: 0.5,
+      duration: 0.2,
+      ease: 'power1.inOut',
+    });
   }
 
   toEnable() {
     this.eventMode = 'static';
-    this.alpha = 1;
+
+    if (this.alpha === 1) return;
+
+    gsap.to(this, {
+      alpha: 1,
+      duration: 0.2,
+      ease: 'power1.inOut',
+    });
   }
 
   resetPosition() {
@@ -65,13 +81,13 @@ export class Shape extends Container {
     this.scale.set(0.5);
   }
 
-  private getRandomStructure(): number[][] {
+  private getRandomStructure(): ShapeStructure {
     const shape = ALL_SHAPES[getRandomInt(0, ALL_SHAPES.length - 1)];
 
     return shape;
   }
 
-  private getRandomBlockTextureName() {
+  private getRandomBlockTextureName(): BlockColor {
     const textureName = BLOCK_COLORS[getRandomInt(0, BLOCK_COLORS.length - 1)];
 
     return textureName;

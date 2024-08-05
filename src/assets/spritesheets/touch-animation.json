@@ -1,0 +1,138 @@
+{
+  "frames": {
+    "1.png": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 224,
+        "h": 224
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 224
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 224
+      }
+    },
+    "2.png": {
+      "frame": {
+        "x": 227,
+        "y": 1,
+        "w": 360,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 360,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 360,
+        "h": 360
+      }
+    },
+    "3.png": {
+      "frame": {
+        "x": 1,
+        "y": 363,
+        "w": 512,
+        "h": 512
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 512
+      },
+      "sourceSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    "4.png": {
+      "frame": {
+        "x": 589,
+        "y": 1,
+        "w": 512,
+        "h": 512
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 512
+      },
+      "sourceSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    "5.png": {
+      "frame": {
+        "x": 515,
+        "y": 515,
+        "w": 512,
+        "h": 512
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 512
+      },
+      "sourceSize": {
+        "w": 512,
+        "h": 512
+      }
+    }
+  },
+  "animations": {
+    "touch": [
+      "1.png",
+      "1.png",
+      "1.png",
+      "1.png",
+      "2.png",
+      "2.png",
+      "2.png",
+      "3.png",
+      "3.png",
+      "3.png",
+      "4.png",
+      "4.png",
+      "4.png",
+      "4.png",
+      "5.png",
+      "5.png",
+      "5.png",
+      "5.png",
+      "5.png"
+    ]
+  },
+  "meta": {
+    "app": "http://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "touch-animation.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1102,
+      "h": 1028
+    },
+    "scale": "1"
+  }
+}

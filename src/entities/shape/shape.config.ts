@@ -1,10 +1,12 @@
+import { BlockColor, ShapeStructure } from './shape.types';
+
 export enum ShapeName {
   DOTS = 'dots',
 }
 
 const shape1x1 = [[1]];
 
-const shape2x2 = [
+export const shape2x2: ShapeStructure = [
   [1, 1],
   [1, 1],
 ];
@@ -19,9 +21,9 @@ const shape3x3 = [
   [1, 1, 1],
 ];
 
-const shape4x1 = [[1, 1, 1, 1]];
+export const shape4x1: ShapeStructure = [[1, 1, 1, 1]];
 
-const shape1x4 = [[1], [1], [1], [1]];
+export const shape1x4: ShapeStructure = [[1], [1], [1], [1]];
 
 const shape5x1 = [[1, 1, 1, 1, 1]];
 
@@ -210,7 +212,7 @@ export const ALL_SHAPES = [
   shapeTriangle_8,
 ];
 
-export const BLOCK_COLORS = [
+export const BLOCK_COLORS: BlockColor[] = [
   'block-pink',
   'block-green',
   'block-violet',

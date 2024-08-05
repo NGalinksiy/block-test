@@ -1,22 +1,18 @@
 import { Container, Graphics, Sprite } from 'pixi.js';
-import { DEFAULT_SIZE } from './grid.config';
 import { Cell } from './cell/Cell';
 import { Shape } from '../shape/Shape';
-import { updateScore } from '../score/update-score';
 import { GameScene } from '@/scenes';
 import { startLightVibrate } from '@/shared/utils';
-import { CELL_MARGIN, GRID_SIDE } from '@/shared/constants';
+import { CELL_MARGIN, GRID_MARGIN, GRID_SIDE } from '@/shared/constants';
 import {
   LIGHT_PURPLE_GRID_BORDER,
   PURPLE_GRID_BACKGROUND,
 } from './grid.constants';
-import { objectToCenter } from '@/shared/utils/object-to-center';
-import { PIXI_CONFIG } from '@/app';
 
 export class Grid extends Container {
   declare parent: GameScene;
-  private readonly matrix: Cell[][];
-  size: number = DEFAULT_SIZE;
+  private matrix!: Cell[][];
+  size!: number;
   ghostPosition: {
     position: { x: number; y: number };
     sprites: Sprite[];
@@ -27,36 +23,45 @@ export class Grid extends Container {
     super();
 
     const background = new Graphics()
-      .roundRect(12, 12, GRID_SIDE - 24, GRID_SIDE - 24, CELL_MARGIN)
+      .roundRect(
+        CELL_MARGIN * 2 + GRID_MARGIN,
+        CELL_MARGIN * 2 + window.innerHeight / 2 - GRID_SIDE / 2,
+        GRID_SIDE - CELL_MARGIN * 4,
+        GRID_SIDE - CELL_MARGIN * 4,
+        18
+      )
       .fill(PURPLE_GRID_BACKGROUND);
 
     const border = new Graphics()
-      .roundRect(0, 0, GRID_SIDE, GRID_SIDE, CELL_MARGIN * 3)
+      .roundRect(
+        GRID_MARGIN,
+        0 + window.innerHeight / 2 - GRID_SIDE / 2,
+        GRID_SIDE,
+        GRID_SIDE,
+        18
+      )
       .fill(LIGHT_PURPLE_GRID_BORDER);
 
     this.addChild(border, background);
-
-    this.matrix = this.initMatrix();
-
-    // this.pivot.y = (0.5 * this.height) / this.scale.y;
-    // this.pivot.x = (0.5 * this.width) / this.scale.x;
-    // this.x = PIXI_CONFIG.width / 2;
   }
 
-  private initMatrix(size: number = DEFAULT_SIZE): Cell[][] {
-    this.size = size;
-    const matrix: Cell[][] = new Array(size);
+  initMatrix(modelMatrix: (number | null)[][]): void {
+    this.size = modelMatrix.length;
+    const matrix: Cell[][] = new Array(this.size);
 
-    for (let i = 0; i < size; i++) {
-      matrix[i] = new Array(size);
-      for (let j = 0; j < size; j++) {
+    for (let i = 0; i < this.size; i++) {
+      matrix[i] = new Array(this.size);
+      for (let j = 0; j < this.size; j++) {
         const cell = new Cell(j, i);
-        this.addChild(cell);
         matrix[i][j] = cell;
+        this.addChild(cell);
+
+        if (modelMatrix[i][j]) cell.setBlock('block-green', false);
+        if (modelMatrix[i][j] === null) cell.tutorialLock = true;
       }
     }
 
-    return matrix;
+    this.matrix = matrix;
   }
 
   private validSet(shape: Shape, position: { x: number; y: number }): boolean {
@@ -72,7 +77,7 @@ export class Grid extends Container {
           return false;
         }
 
-        if (!cell || cell?.installedBlock) return false;
+        if (!cell || cell?.isInstalledBlock || cell?.tutorialLock) return false;
       }
     }
 
@@ -102,7 +107,18 @@ export class Grid extends Container {
     return shapes.length !== shapesCantBeSet.length;
   }
 
-  checkMatrix(): void {
+  isMatrixEmpty(): boolean {
+    const size = this.matrix.length;
+
+    for (let i = 0; i < size; i++) {
+      if (this.matrix[i].filter((cell) => cell.isInstalledBlock).length) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async checkMatrix(): Promise<void> {
     const size = this.matrix.length;
     let score: number = 0;
     const forDestruction = [];
@@ -111,7 +127,7 @@ export class Grid extends Container {
     for (let i = 0; i < size; i++) {
       let allOnes = true;
       for (let j = 0; j < size; j++) {
-        if (!this.matrix[i][j].installedBlock) {
+        if (!this.matrix[i][j].isInstalledBlock) {
           allOnes = false;
           break;
         }
@@ -119,7 +135,7 @@ export class Grid extends Container {
       if (allOnes) {
         startLightVibrate();
         this.matrix[i].forEach((cell) => {
-          forDestruction.push(cell);
+          if (cell.isInstalledBlock) forDestruction.push(cell);
         });
       }
     }
@@ -127,7 +143,7 @@ export class Grid extends Container {
     for (let j = 0; j < size; j++) {
       let allOnes = true;
       for (let i = 0; i < size; i++) {
-        if (!this.matrix[i][j].installedBlock) {
+        if (!this.matrix[i][j].isInstalledBlock) {
           allOnes = false;
           break;
         }
@@ -135,17 +151,19 @@ export class Grid extends Container {
       if (allOnes) {
         startLightVibrate();
         for (let i = 0; i < size; i++) {
-          forDestruction.push(this.matrix[i][j]);
+          const cell = this.matrix[i][j];
+          if (cell.isInstalledBlock) forDestruction.push(cell);
         }
       }
     }
 
-    forDestruction.forEach((cell) => {
+    for (const cell of forDestruction) {
       score += 1;
       cell.clearCell();
-    });
+    }
 
-    updateScore(score);
+    console.log(score);
+    this.parent.header.updateCurrentScore(score);
     this.parent.update();
   }
 
@@ -172,9 +190,10 @@ export class Grid extends Container {
     const { x, y } = position;
 
     for (const [i, row] of dragTarget.structure.entries()) {
-      for (const [j, cell] of row.entries()) {
-        if (!cell) continue;
-        this.addShape(x + j, y + i, dragTarget.textureName, true);
+      for (const [j, value] of row.entries()) {
+        if (!value) continue;
+        const cell = this.matrix[y + i][x + j];
+        cell.setBlock(dragTarget.textureName, true);
       }
     }
   }
@@ -199,32 +218,17 @@ export class Grid extends Container {
     shape.isInstalled = true;
 
     const { x, y } = position;
-
+    let score = 0;
     for (const [i, row] of shape.structure.entries()) {
-      for (const [j, cell] of row.entries()) {
-        if (!cell) continue;
-        this.addShape(x + j, y + i, shape.textureName, false);
+      for (const [j, value] of row.entries()) {
+        if (!value) continue;
+
+        const cell = this.matrix[y + i][x + j];
+        cell.setBlock(shape.textureName, false);
+        score += 1;
       }
     }
-  }
 
-  private addShape(
-    x: number,
-    y: number,
-    textureName: string,
-    isGhost: boolean
-  ) {
-    try {
-      const sprite = Sprite.from(textureName);
-
-      if (isGhost) {
-        sprite.alpha = 0.5;
-        this.ghostPosition?.sprites.push(sprite);
-      } else {
-        this.matrix[y][x].installedBlock = true;
-      }
-
-      this.matrix[y][x].addChild(sprite);
-    } catch {}
+    this.parent.header.updateCurrentScore(score);
   }
 }

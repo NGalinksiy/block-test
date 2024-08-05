@@ -1,35 +1,85 @@
 import { Grid, RowShape, Shape } from '@/entities';
-import {
-  Application,
-  Container,
-  FederatedPointerEvent,
-  Rectangle,
-} from 'pixi.js';
+import { Container, FederatedPointerEvent } from 'pixi.js';
 import { GameState } from './game-scene.types';
-import { CELL_SIDE } from '@/shared/constants';
+import { CELL_SIDE, GRID_SIDE } from '@/shared/constants';
+import {
+  CLEAR_MATRIX,
+  TUTORIAL_MATRIX_ARRAY,
+} from '@/entities/grid/grid.constants';
+import { Header } from '@/widgets';
+import { RoutingScene } from '../routing-scene/RoutingScene';
+import {
+  getBestScore,
+  isPassedTutorial,
+  setBestScore,
+  setCurrentScore,
+} from '@/shared/utils/local-storage';
 
 export class GameScene extends Container {
+  declare parent: RoutingScene;
   label = 'game-scene';
   readonly grid: Grid;
   readonly rowShape: RowShape;
-  private gameState = GameState.GAMEPLAY;
+  readonly header: Header;
+  private _gameState!: GameState;
+  private _tutorialLevel: 0 | 1 | 2 | null = null;
+  isFirstPlay: boolean = !isPassedTutorial();
   dragTarget: null | Shape = null;
 
-  constructor(app: Application) {
+  constructor() {
     super();
 
     this.grid = new Grid();
     this.rowShape = new RowShape();
+    this.header = new Header();
+
+    setCurrentScore(0);
+
+    if (this.isFirstPlay) {
+      this.gameState = GameState.TUTORIAL;
+    } else {
+      this.gameState = GameState.GAMEPLAY;
+    }
 
     this.eventMode = 'static';
-    this.hitArea = new Rectangle(0, 0, 970, 1417);
 
     this.on('pointerup', this.onDragEnd);
     this.on('pointerupoutside', this.onDragEnd);
 
-    this.addChild(this.grid, this.rowShape);
+    this.addChild(this.grid, this.rowShape, this.header);
 
     this.rowShape.generateShape();
+  }
+
+  public get gameState(): GameState {
+    return this._gameState;
+  }
+
+  public set gameState(gameState: GameState) {
+    if (gameState === GameState.TUTORIAL) {
+      this.tutorialLevel = 0;
+    }
+
+    if (gameState === GameState.GAMEPLAY) {
+      if (this.isFirstPlay) {
+        this.isFirstPlay = false;
+      }
+      this.grid.initMatrix(CLEAR_MATRIX);
+      this.tutorialLevel = null;
+    }
+
+    this._gameState = gameState;
+  }
+
+  public get tutorialLevel() {
+    return this._tutorialLevel;
+  }
+
+  public set tutorialLevel(value: 0 | 1 | 2 | null) {
+    this._tutorialLevel = value;
+    if (this._tutorialLevel === null) return;
+
+    this.grid.initMatrix(TUTORIAL_MATRIX_ARRAY[this._tutorialLevel]);
   }
 
   onDragMove(event: FederatedPointerEvent): void {
@@ -47,7 +97,11 @@ export class GameScene extends Container {
       (globalX - this.dragTarget.width * 0.5) / CELL_SIDE - 0.7
     );
     const rawY = Math.round(
-      (globalY - this.dragTarget.pivot.y) / CELL_SIDE - 0.5
+      (globalY -
+        (window.innerHeight / 2 - GRID_SIDE / 2) -
+        this.dragTarget.pivot.y) /
+        CELL_SIDE -
+        0.5
     );
 
     const [x, y] = this.resolvingCoordinates(rawX, rawY);
@@ -58,22 +112,35 @@ export class GameScene extends Container {
   }
 
   update(): void {
+    if (this.grid.isMatrixEmpty() && this._gameState === GameState.TUTORIAL) {
+      if (this.tutorialLevel !== null && this.tutorialLevel + 1 <= 2) {
+        this.tutorialLevel += 1;
+      } else {
+        this.gameState = GameState.GAMEPLAY;
+      }
+    }
+
     this.rowShape.generateShape();
+
     const shapes = this.rowShape.getShapes();
     const isGameOver = !this.grid.canBeSet(shapes);
 
     if (isGameOver && this.gameState !== GameState.GAMEOVER) {
       this.gameState = GameState.GAMEOVER;
       setTimeout(() => {
-        window.confirm('gameover');
-        window.location.reload();
+        const prevBestScore = getBestScore();
+        const currentScore = this.header.getCurrentScore();
+
+        if (prevBestScore < currentScore) {
+          setBestScore(currentScore);
+        }
+
+        this.parent.setGameover();
       }, 1000);
     }
   }
 
-  private onDragEnd(): void {
-    console.log('ended drag', this.dragTarget);
-
+  private async onDragEnd(): Promise<void> {
     if (this.dragTarget) {
       this.off('pointermove', this.onDragMove);
       this.dragTarget.alpha = 1;
@@ -81,7 +148,7 @@ export class GameScene extends Container {
       this.grid.resetGhost();
 
       if (this.dragTarget.isInstalled) {
-        this.grid.checkMatrix();
+        await this.grid.checkMatrix();
         this.rowShape.removeChild(this.dragTarget);
         this.dragTarget = null;
       } else {

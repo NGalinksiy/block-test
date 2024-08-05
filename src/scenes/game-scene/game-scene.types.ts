@@ -3,4 +3,5 @@ export enum GameState {
   GAMEPLAY = 'GAMEPLAY',
   TUTORIAL = 'TUTORIAL',
   PAUSE = 'PAUSE',
+  START_SCREEN = 'START_SCREEN',
 }
