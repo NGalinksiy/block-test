@@ -1,15 +1,11 @@
 import {
-  BUTTON_GAP,
-  FONT_GAMEOVER_SIZE,
   GAMEOVER_CONTAINER_HEIGHT,
   GAMEOVER_CONTAINER_WIDTH,
-  GAMEOVER_TEXT_HEIGHT,
-  GAMEOVER_TEXT_WIDTH,
   SCALE,
 } from '@/shared/constants';
 import { Button, ButtonVariant, Modal } from '@/shared/ui';
 import { RoutingScene } from '@/scenes';
-import { Color, FillGradient, Graphics, Sprite, Text } from 'pixi.js';
+import { Graphics, Sprite, Text } from 'pixi.js';
 import { BestScore } from '@/entities/best-score/BestScore';
 import { CurrentScore } from '@/entities/current-score/CurrentScore';
 import { getBestScore, getCurrentScore } from '@/shared/utils/local-storage';

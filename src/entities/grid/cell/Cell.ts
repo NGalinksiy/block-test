@@ -4,7 +4,7 @@ import {
   GRID_MARGIN,
   GRID_SIDE,
 } from '@/shared/constants';
-import { Container, Sprite } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 
 import { BlockColor } from '../../shape/shape.types';
 import { Grid } from '../Grid';
@@ -13,7 +13,9 @@ export class Cell extends Container {
   declare parent: Grid;
   readonly boardPosition: { x: number; y: number };
   isInstalledBlock: boolean = false;
+  hasGhostBlock: boolean = false;
   tutorialLock: boolean = false;
+  originBlockColor: BlockColor | null = null;
 
   constructor(x: number, y: number, block?: Sprite) {
     super();
@@ -42,15 +44,42 @@ export class Cell extends Container {
 
   setBlock(textureName: BlockColor, isGhost: boolean) {
     const block = Sprite.from(textureName);
+    this.addChild(block);
 
     if (isGhost) {
+      this.hasGhostBlock = true;
       block.alpha = 0.5;
       this.parent.ghostPosition?.sprites.push(block);
     } else {
       this.isInstalledBlock = true;
+      this.originBlockColor = textureName;
+    }
+  }
+
+  hasBlock(includeGhost: boolean) {
+    if (includeGhost) {
+      return (this.isInstalledBlock || this.hasGhostBlock) && !!this.getBlock();
     }
 
-    this.addChild(block);
+    return this.isInstalledBlock;
+  }
+
+  resetColor() {
+    if (!this.originBlockColor) return;
+
+    const block = this.getBlock();
+    if (!block) return;
+
+    block.texture = Texture.from(this.originBlockColor);
+  }
+
+  changeColorBlock(newTextureName: BlockColor) {
+    if (!this.isInstalledBlock) return;
+    const block = this.getBlock();
+
+    if (!block) return;
+
+    block.texture = Texture.from(newTextureName);
   }
 
   clearCell() {
@@ -58,6 +87,12 @@ export class Cell extends Container {
     try {
       this.removeChildren(1);
     } catch {}
+  }
+
+  private getBlock(): Sprite | null {
+    const block = this.children[1] as Sprite;
+
+    return block;
   }
 
   private getColorCell(): 'cell-dark' | 'cell-light' {

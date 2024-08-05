@@ -1,13 +1,13 @@
 import { Container, Rectangle, Sprite } from 'pixi.js';
 import { ALL_SHAPES, BLOCK_COLORS } from './shape.config';
-import { GameScene } from '@/scenes';
 import { getRandomInt } from '@/shared/utils';
 import { CELL_MARGIN, CELL_SIDE } from '@/shared/constants';
 import { BlockColor, ShapeStructure } from './shape.types';
 import gsap from 'gsap';
+import { RowShape } from '../row-shape/RowShape';
 
 export class Shape extends Container {
-  declare parent: GameScene;
+  declare parent: RowShape;
   isInstalled: boolean = false;
   readonly structure: ShapeStructure;
   originPosition!: { x: number; y: number };
@@ -39,7 +39,7 @@ export class Shape extends Container {
 
   onDragStart() {
     this.alpha = 1;
-    const parent = this.parent.parent as GameScene;
+    const parent = this.parent.parent;
     this.scale.set(1);
     this.pivot.y +=
       this.height >= 500 ? this.height / 2 : this.height / 2 + CELL_SIDE;
@@ -82,7 +82,9 @@ export class Shape extends Container {
   }
 
   private getRandomStructure(): ShapeStructure {
-    const shape = ALL_SHAPES[getRandomInt(0, ALL_SHAPES.length - 1)];
+    const shape = ALL_SHAPES[
+      getRandomInt(0, ALL_SHAPES.length - 1)
+    ] as ShapeStructure;
 
     return shape;
   }

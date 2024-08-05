@@ -4,7 +4,7 @@ import {
   ICON_PADDING,
 } from '@/shared/constants';
 import { getBestScore } from '@/shared/utils/local-storage';
-import { Container, Sprite, Text, Texture } from 'pixi.js';
+import { Container, Sprite, Text } from 'pixi.js';
 
 export class BestScore extends Container {
   private readonly text: Text;

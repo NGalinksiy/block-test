@@ -12,7 +12,7 @@ import buttonPrimary from '@/assets/images/button-primary.png';
 import buttonSecondary from '@/assets/images/button-secondary.png';
 import touchAnimation from '@/assets/spritesheets/touch-animation.png';
 import gameoverText from '@/assets/images/gameover-text.png';
-import archivo from '@/assets/fonts/Archivo.ttf';
+import archivo from '@/assets/fonts/Archivo.ttf?url';
 import { VolumeToggleTexture } from '@/entities/buttons';
 
 export const manifest = {
@@ -32,7 +32,7 @@ export const manifest = {
         volumeOn: { alias: VolumeToggleTexture.VOLUME_ON, src: volumeOn },
         buttonPrimary: { alias: 'button-primary', src: buttonPrimary },
         buttonSecondary: { alias: 'button-secondary', src: buttonSecondary },
-        archivo: { src: archivo },
+        archivo: { alias: 'archivo', src: archivo },
         touchAnimation: { alias: 'touch-animation', src: touchAnimation },
         gameoverText: { alias: 'gameover-text', src: gameoverText },
       },

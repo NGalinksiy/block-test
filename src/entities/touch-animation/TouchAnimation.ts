@@ -8,6 +8,7 @@ export class TouchAnimation extends AnimatedSprite {
     this.scale.set(0.1);
     this.anchor.set(0.5);
     this.loop = false;
+
     this.onComplete = () => {
       gsap.to(this, {
         alpha: 0,

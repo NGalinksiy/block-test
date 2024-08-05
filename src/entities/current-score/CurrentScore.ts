@@ -17,7 +17,7 @@ export class CurrentScore extends Text {
       text: '0',
       style: {
         fill: { fill },
-        fontFamily: 'archivo',
+        fontFamily: 'Archivo',
         fontSize: FONT_CURRENT_SCORE_SIZE,
       },
     });

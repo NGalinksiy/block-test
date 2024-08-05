@@ -1,5 +1,3 @@
-import { Cell } from './cell/Cell';
-
 export const PURPLE_GRID_BACKGROUND = '#32166D';
 export const LIGHT_PURPLE_GRID_BORDER = '#E6C7E9';
 

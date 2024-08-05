@@ -8,6 +8,7 @@ import {
   LIGHT_PURPLE_GRID_BORDER,
   PURPLE_GRID_BACKGROUND,
 } from './grid.constants';
+import { BlockColor } from '../shape/shape.types';
 
 export class Grid extends Container {
   declare parent: GameScene;
@@ -16,6 +17,7 @@ export class Grid extends Container {
   ghostPosition: {
     position: { x: number; y: number };
     sprites: Sprite[];
+    repaintedBlocks: Cell[];
   } | null = null;
   installedShapes: Sprite[] = [];
 
@@ -118,7 +120,7 @@ export class Grid extends Container {
     return true;
   }
 
-  async checkMatrix(): Promise<void> {
+  checkMatrix(isGhost: boolean = false) {
     const size = this.matrix.length;
     let score: number = 0;
     const forDestruction = [];
@@ -127,7 +129,8 @@ export class Grid extends Container {
     for (let i = 0; i < size; i++) {
       let allOnes = true;
       for (let j = 0; j < size; j++) {
-        if (!this.matrix[i][j].isInstalledBlock) {
+        const cell = this.matrix[i][j];
+        if (!cell.hasBlock(isGhost)) {
           allOnes = false;
           break;
         }
@@ -135,7 +138,8 @@ export class Grid extends Container {
       if (allOnes) {
         startLightVibrate();
         this.matrix[i].forEach((cell) => {
-          if (cell.isInstalledBlock) forDestruction.push(cell);
+          if (cell.isInstalledBlock || cell.hasGhostBlock)
+            forDestruction.push(cell);
         });
       }
     }
@@ -143,7 +147,8 @@ export class Grid extends Container {
     for (let j = 0; j < size; j++) {
       let allOnes = true;
       for (let i = 0; i < size; i++) {
-        if (!this.matrix[i][j].isInstalledBlock) {
+        const cell = this.matrix[i][j];
+        if (!cell.hasBlock(isGhost)) {
           allOnes = false;
           break;
         }
@@ -152,22 +157,35 @@ export class Grid extends Container {
         startLightVibrate();
         for (let i = 0; i < size; i++) {
           const cell = this.matrix[i][j];
-          if (cell.isInstalledBlock) forDestruction.push(cell);
+          if (cell.isInstalledBlock || cell.hasGhostBlock)
+            forDestruction.push(cell);
         }
       }
     }
+
+    if (isGhost) return forDestruction;
 
     for (const cell of forDestruction) {
       score += 1;
       cell.clearCell();
     }
 
-    console.log(score);
     this.parent.header.updateCurrentScore(score);
     this.parent.update();
   }
 
-  showGhost(dragTarget: Shape, position: { x: number; y: number }) {
+  showGhostDestruction(textureName: BlockColor) {
+    const forDestruction = this.checkMatrix(true);
+
+    if (!forDestruction) return;
+
+    for (const cell of forDestruction) {
+      cell.changeColorBlock(textureName);
+      this.ghostPosition?.repaintedBlocks.push(cell);
+    }
+  }
+
+  showGhostShape(dragTarget: Shape, position: { x: number; y: number }) {
     const isValid = !this.validSet(dragTarget, position);
     if (isValid) {
       if (
@@ -196,16 +214,23 @@ export class Grid extends Container {
         cell.setBlock(dragTarget.textureName, true);
       }
     }
+    this.showGhostDestruction(dragTarget.textureName);
   }
 
   resetGhost(position?: { x: number; y: number }) {
     if (this.ghostPosition?.sprites.length) {
       for (const sprite of this.ghostPosition!.sprites!) {
+        //@ts-ignore
+        sprite.parent.hasGhostBlock = false;
         sprite.parent.removeChild(sprite);
+      }
+
+      for (const cell of this.ghostPosition.repaintedBlocks) {
+        cell.resetColor();
       }
     }
     if (position) {
-      this.ghostPosition = { position, sprites: [] };
+      this.ghostPosition = { position, sprites: [], repaintedBlocks: [] };
     } else {
       this.ghostPosition = null;
     }

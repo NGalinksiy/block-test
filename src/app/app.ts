@@ -33,7 +33,6 @@ export const App = async (): Promise<Application> => {
   app.stage.hitArea = app.screen;
   app.stage.interactive = true;
   app.stage.on('pointerdown', (event) => {
-    console.log(event);
     if (event.target instanceof Shape) return;
     const touchAnimation = new TouchAnimation(spritesheet);
     app.stage.addChild(touchAnimation);

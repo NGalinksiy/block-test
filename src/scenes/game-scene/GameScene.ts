@@ -10,7 +10,6 @@ import { Header } from '@/widgets';
 import { RoutingScene } from '../routing-scene/RoutingScene';
 import {
   getBestScore,
-  isPassedTutorial,
   setBestScore,
   setCurrentScore,
 } from '@/shared/utils/local-storage';
@@ -23,7 +22,8 @@ export class GameScene extends Container {
   readonly header: Header;
   private _gameState!: GameState;
   private _tutorialLevel: 0 | 1 | 2 | null = null;
-  isFirstPlay: boolean = !isPassedTutorial();
+  // isFirstPlay: boolean = !isPassedTutorial();
+  isFirstPlay: boolean = true;
   dragTarget: null | Shape = null;
 
   constructor() {
@@ -106,9 +106,7 @@ export class GameScene extends Container {
 
     const [x, y] = this.resolvingCoordinates(rawX, rawY);
 
-    console.log(`x: ${x}`, `y: ${y}`);
-
-    this.grid.showGhost(this.dragTarget, { x, y });
+    this.grid.showGhostShape(this.dragTarget, { x, y });
   }
 
   update(): void {

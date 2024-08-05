@@ -1,12 +1,7 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { Shape } from '../shape/Shape';
 import { GameScene } from '@/scenes';
-import {
-  CELL_MARGIN,
-  GRID_MARGIN,
-  GRID_SIDE,
-  HEIGHT_HEADER,
-} from '@/shared/constants';
+import { CELL_MARGIN, GRID_MARGIN, GRID_SIDE } from '@/shared/constants';
 import { GameState } from '@/scenes/game-scene/game-scene.types';
 import { ShapeStructure } from '../shape/shape.types';
 import { tutorialShapes } from './row-shape.constants';
