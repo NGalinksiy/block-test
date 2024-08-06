@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import { GameScene } from '../game-scene/GameScene';
 import { PauseModal } from '@/entities/modals/pause-modal/PauseModal';
 import { Modal } from '@/shared/ui';

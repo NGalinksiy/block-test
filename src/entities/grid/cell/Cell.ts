@@ -8,6 +8,8 @@ import { Container, Sprite, Texture } from 'pixi.js';
 
 import { BlockColor } from '../../shape/shape.types';
 import { Grid } from '../Grid';
+import gsap from 'gsap';
+import { GameState } from '@/scenes/game-scene/game-scene.types';
 
 export class Cell extends Container {
   declare parent: Grid;
@@ -23,8 +25,9 @@ export class Cell extends Container {
 
     const cellColor = this.getColorCell();
     const cellLabel = `${cellColor} ${x}_${y}`;
+    const cellBackground = Sprite.from(cellColor);
 
-    this.addChild(Sprite.from(cellColor));
+    this.addChild(cellBackground);
 
     if (block) this.addChild(block);
 
@@ -43,7 +46,13 @@ export class Cell extends Container {
   }
 
   setBlock(textureName: BlockColor, isGhost: boolean) {
+    const oldBlock = this.getBlock();
+    if (oldBlock) {
+      this.removeChild(oldBlock);
+    }
+
     const block = Sprite.from(textureName);
+
     this.addChild(block);
 
     if (isGhost) {
@@ -84,9 +93,39 @@ export class Cell extends Container {
 
   clearCell() {
     this.isInstalledBlock = false;
-    try {
-      this.removeChildren(1);
-    } catch {}
+
+    const block = this.getBlock();
+    if (!block) return;
+
+    const { x, y } = block.getGlobalPosition();
+    this.parent.parent.addChild(block);
+    block.width = CELL_SIDE;
+    block.height = CELL_SIDE;
+    block.position.set(x, y);
+    block.anchor.set(0.5);
+    block.zIndex = 10;
+
+    const directionRotate = gsap.utils.random(['-', '+']);
+
+    gsap
+      .timeline()
+      .to(block, {
+        duration: gsap.utils.random(0.4, 0.6),
+        rotation: `${directionRotate}=${gsap.utils.random(2, 10)}`,
+        x: `${directionRotate}=${gsap.utils.random(20, 60)}`,
+        y: `-=${gsap.utils.random(30, 70)}`,
+        ease: 'power1.out',
+      })
+      .to(block, {
+        duration: gsap.utils.random(0.6, 1),
+        y: window.innerHeight + block.height,
+        rotation: `${directionRotate}${gsap.utils.random(1, 4)}`,
+        ease: 'power1.in',
+
+        onComplete: () => {
+          this.parent.parent.removeChild(block);
+        },
+      });
   }
 
   private getBlock(): Sprite | null {

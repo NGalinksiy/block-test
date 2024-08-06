@@ -1,5 +1,5 @@
 import { Grid, RowShape, Shape } from '@/entities';
-import { Container, FederatedPointerEvent } from 'pixi.js';
+import { Container, FederatedPointerEvent, Sprite, Texture } from 'pixi.js';
 import { GameState } from './game-scene.types';
 import { CELL_SIDE, GRID_SIDE } from '@/shared/constants';
 import {
@@ -33,6 +33,8 @@ export class GameScene extends Container {
     this.rowShape = new RowShape();
     this.header = new Header();
 
+    this.addChild(this.grid, this.rowShape, this.header);
+
     setCurrentScore(0);
 
     if (this.isFirstPlay) {
@@ -46,8 +48,6 @@ export class GameScene extends Container {
     this.on('pointerup', this.onDragEnd);
     this.on('pointerupoutside', this.onDragEnd);
 
-    this.addChild(this.grid, this.rowShape, this.header);
-
     this.rowShape.generateShape();
   }
 
@@ -56,6 +56,8 @@ export class GameScene extends Container {
   }
 
   public set gameState(gameState: GameState) {
+    this._gameState = gameState;
+
     if (gameState === GameState.TUTORIAL) {
       this.tutorialLevel = 0;
     }
@@ -67,8 +69,6 @@ export class GameScene extends Container {
       this.grid.initMatrix(CLEAR_MATRIX);
       this.tutorialLevel = null;
     }
-
-    this._gameState = gameState;
   }
 
   public get tutorialLevel() {
