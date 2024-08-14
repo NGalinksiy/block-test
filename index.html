@@ -4,31 +4,59 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
+    <title>Block Blast</title>
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>
       eruda.init();
     </script>
-    <script type="module" crossorigin src="./assets/index-BLJ-Mjwl.js"></script>
+    <script type="module" crossorigin src="./assets/index-CqTm_YH_.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index.css">
   </head>
+  <style>
+    .loader {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      width: 100px;
+      height: 100px;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="%23FFFFFF" stroke="%23FFFFFF" stroke-width="15" width="30" height="30" x="25" y="50"><animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></rect><rect fill="%23FFFFFF" stroke="%23FFFFFF" stroke-width="15" width="30" height="30" x="85" y="50"><animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></rect><rect fill="%23FFFFFF" stroke="%23FFFFFF" stroke-width="15" width="30" height="30" x="145" y="50"><animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></rect></svg>');
+    }
+
+    #loading-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #game-logo {
+      max-width: 100%;
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -125%);
+    }
+
+    #onboarding-text {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -125%);
+      text-align: center;
+      color: rgb(240, 228, 241);
+      font-family: Golos Semibold;
+      font-weight: 600;
+      font-size: 24px;
+    }
+  </style>
   <body>
-    <!-- <div
-      id="loading-screen"
-      style="position: absolute; top: 0; left: 0; height: 100vh; width: 100vw"
-    >
-      <img
-        src="/src/assets/images/game-logo.png"
-        style="
-          max-width: 100%;
-          position: relative;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -75%);
-        "
-      />
-      <div>Набирай очки и получай подарки!</div>
-    </div> -->
+    <div id="loading-container">
+      <img id="game-logo" src="./assets/game-logo.png" />
+      <div id="onboarding-text">Набирай очки<br />и получай подарки!</div>
+      <div class="loader"></div>
+    </div>
     <div id="app"></div>
   </body>
 </html>
